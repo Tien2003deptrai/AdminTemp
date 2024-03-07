@@ -31,8 +31,8 @@ export const AuthUser = () => {
     const saveToken = (user, token, role) => {
         localStorage.setItem('access_token', JSON.stringify(token));
         localStorage.setItem('user', JSON.stringify(user));
-        // localStorage.setItem('role', JSON.stringify(role));
-        localStorage.setItem('role', JSON.stringify('ROLE_ADMIN'));
+        localStorage.setItem('role', JSON.stringify(role));
+        // localStorage.setItem('role', JSON.stringify('ROLE_ADMIN'));
         // localStorage.setItem('role', JSON.stringify('ROLE_MANAGER'));
         // localStorage.setItem('role', JSON.stringify('ROLE_USER'));
 
@@ -72,8 +72,8 @@ export const AuthUser = () => {
     const login = async (email, password) => {
         try {
             const response = await http.post('/v1/auth/login', { email, password });
-            const { accessToken } = response.data;
-            saveToken(email, accessToken, 'user');
+            const { accessToken, role } = response.data;
+            saveToken(email, accessToken, role);
             navigate('/dashboard');
             sendToast('Login successful!');
         } catch (error) {

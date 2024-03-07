@@ -1,19 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { CCard, CCardBody } from '@coreui/react';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
-import { useEffect } from 'react';
 import { AuthUser } from 'src/services/AuthUser';
+import { roleCheck } from 'src/config/common';
+import { handleAdd, handleDelete, handleUpdate, usePermissionState } from 'src/config/permissions';
 
 const Jobs = () => {
   const [jobs, setJobs] = useState([]);
-  const { http } = AuthUser();
+  const { http, token, role } = AuthUser();
+
+  const {
+    haveAdd, setHaveAdd,
+    haveUpdate, setHaveUpdate,
+    haveDelete, setHaveDelete,
+    haveView, setHaveView
+  } = usePermissionState();
 
   const fetchApiJobs = async () => {
-    return await http.get('/v1/tasks')
-      .then(res => { return transformData(res.data.content) })
-      .catch(err => console.error(err))
-  }
+    try {
+      const response = await http.get('/v1/tasks');
+      return transformData(response.data.content);
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
 
   const transformData = (data) => {
     return data.map(job => {
@@ -24,24 +35,69 @@ const Jobs = () => {
 
   useEffect(() => {
     fetchApiJobs()
-      .then(apiJob => {
-        setJobs(apiJob)
-        console.log(jobs);
+      .then(apiJobs => {
+        setJobs(apiJobs);
       })
-      .catch(err => console.error(err))
-  }, [])
+      .catch(err => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    if (token && role === roleCheck.staff) {
+      setHaveAdd(false);
+      setHaveUpdate(false);
+      setHaveDelete(false);
+      setHaveView(true);
+    } else {
+      setHaveAdd(true);
+      setHaveUpdate(true);
+      setHaveDelete(true);
+      setHaveView(true);
+    }
+  }, [token, role]);
+
+  const permissionAdd = () => {
+    handleAdd(haveAdd)
+  }
+
+  const permissionUpdate = () => {
+    handleUpdate(haveUpdate)
+  }
+
+  const permissionDelete = () => {
+    handleDelete(haveDelete)
+  }
+
+  const checkPermissionAccessAdd = () => {
+    return (
+      <>
+        {
+          token && role === roleCheck.staff ? (
+            <button type="button" className="btn btn-warning mb-3"
+              onClick={() => permissionAdd()}
+            >
+              Sửa
+            </button>
+          ) : (
+            <Link to={'/jobs/add'}>
+              <button type="button" className="btn btn-warning mb-3">Thêm</button>
+            </Link>
+          )
+        }
+      </>
+    )
+  }
 
   return (
     <>
       <div className="container">
         <h2>Danh sách công việc</h2>
-        <Link to={'/jobs/add'}>
-          <button type="button" className="btn btn-warning mb-3">Thêm</button>
-        </Link>
+        {
+          checkPermissionAccessAdd()
+        }
       </div>
       <CCard className="mb-4">
         <CCardBody>
-          <div className="table-responsive d-flex justify-content-center">
+          <div className="table-responsive">
             <table className="table table-bordered text-center">
               <thead>
                 <tr>
@@ -56,29 +112,40 @@ const Jobs = () => {
                 </tr>
               </thead>
               <tbody>
-                {
-                  jobs?.length > 0 &&
-                  jobs.map((job, jobIndex) => (
-                    <tr key={`job${jobIndex}`}>
-                      <th scope="row">{jobIndex + 1}</th>
-                      <td>{job.name}</td>
-                      <td>Dự án CRM</td>
-                      <td>{job.username}</td>
-                      <td>{job.startDate}</td>
-                      <td>{job.endDate}</td>
-                      <td>{job.status}</td>
-                      <td>
-                        <div className="d-grid gap-2 d-md-block">
-                          <Link to={`/jobs/update/${job.id}`}>
-                            <button type="button" className="btn btn-primary mb-2">Sửa</button>
-                          </Link>
-                          <button type="button" className="btn btn-danger mb-2 ms-2">Xoá</button>
-                          <button type="button" className="btn btn-success mb-2 ms-2">Xem</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                }
+                {jobs.map((job, jobIndex) => (
+                  <tr key={`job${jobIndex}`}>
+                    <td>{jobIndex + 1}</td>
+                    <td>{job.name}</td>
+                    <td>Dự án CRM</td>
+                    <td>{job.username}</td>
+                    <td>{job.startDate}</td>
+                    <td>{job.endDate}</td>
+                    <td>{job.status}</td>
+                    <td>
+                      <div className="d-flex justify-content-center align-items-center">
+                        {
+                          token && role === roleCheck.staff ? (
+                            <button type="button" className="btn btn-primary mx-1"
+                              onClick={() => permissionUpdate()}
+                            >
+                              Sửa
+                            </button>
+                          ) : (
+                            <Link to={`/jobs/update/${job.id}`} className="btn btn-primary mx-1"
+                            >
+                              Sửa
+                            </Link>
+                          )
+                        }
+                        <button className="btn btn-danger mx-1"
+                          onClick={() => permissionDelete()}
+                        >
+                          Xoá
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

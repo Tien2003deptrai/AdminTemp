@@ -9,11 +9,11 @@ import Jobs from './views/jobs/Jobs';
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
-  { path: '/dashboard', name: 'Dashboard', element: Dashboard, allowedRoles: ['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_USER'] },
-  { path: '/members', name: 'Members', element: Members, allowedRoles: ['ROLE_ADMIN'] },
-  { path: '/projects', name: 'Projects', element: Projects, allowedRoles: ['ROLE_ADMIN', 'ROLE_MANAGER'] },
-  { path: '/roles', name: 'Roles', element: IsRole, allowedRoles: ['ROLE_ADMIN'] },
-  { path: '/jobs', name: 'Jobs', element: Jobs, allowedRoles: ['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_USER'] },
+  { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+  { path: '/members', name: 'Members', element: Members },
+  { path: '/projects', name: 'Projects', element: Projects },
+  { path: '/roles', name: 'Roles', element: IsRole },
+  { path: '/jobs', name: 'Jobs', element: Jobs },
 ];
 
 export default routes;

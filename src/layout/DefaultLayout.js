@@ -1,7 +1,14 @@
 import React from 'react'
 import { AppContent, AppSidebar, AppFooter, AppHeader } from '../components/index'
+import { AuthUser } from 'src/services/AuthUser';
+import Page404 from 'src/views/pages/page404/Page404';
 
 const DefaultLayout = () => {
+
+  const { token } = AuthUser();
+
+  if (!token) return <Page404 />
+
   return (
     <div>
       <AppSidebar />

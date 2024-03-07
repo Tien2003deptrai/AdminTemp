@@ -3,15 +3,21 @@ import { CCard, CCardBody } from '@coreui/react';
 import { Link } from 'react-router-dom';
 import { AuthUser } from 'src/services/AuthUser';
 import { sendToast, sendToastError } from 'src/config/configToast';
+import { roleCheck } from 'src/config/common';
+import Page404 from '../pages/page404/Page404';
 
 const IsRole = () => {
   const [roles, setRoles] = useState([]);
-  const { http } = AuthUser();
+  const { role, http } = AuthUser();
 
   const fetchApiRoles = async () => {
-    return http.get('/v1/roles')
-      .then(res => { return res.data })
-      .catch(err => console.error(err))
+    try {
+      const response = await http.get('/v1/roles');
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
   }
 
   const deleteRole = async (id) => {
@@ -30,10 +36,13 @@ const IsRole = () => {
     fetchApiRoles()
       .then(apiRoles => {
         setRoles(apiRoles)
-        console.log(roles);
       })
       .catch(err => console.error(err))
   }, [])
+
+  if (role === roleCheck.staff || role === roleCheck.manager) {
+    return <Page404 />;
+  }
 
   return (
     <>
@@ -52,26 +61,23 @@ const IsRole = () => {
                   <th scope="col">STT</th>
                   <th scope="col">Tên quyền</th>
                   <th scope="col">Miêu tả</th>
-                  <th scope="col" className="col-3">Hành động</th>
+                  <th scope="col">Hành động</th>
                 </tr>
               </thead>
               <tbody>
-                {
-                  roles?.length > 0 &&
-                  roles.map((role, roleIndex) => (
-                    <tr key={roleIndex}>
-                      <td scope="col">{roleIndex + 1}</td>
-                      <td scope="col">{role.name}</td>
-                      <td scope="col">{role.description}</td>
-                      <div className="d-grid gap-2 d-md-block">
-                        <Link to={`/roles/update/${role.id}`}>
-                          <button type="button" className="btn btn-primary mb-2">Sửa</button>
-                        </Link>
-                        <button type="button" className="btn btn-danger mb-2 ms-2" onClick={() => deleteRole(role.id)}>Xoá</button>
+                {roles.map((role, roleIndex) => (
+                  <tr key={roleIndex}>
+                    <td>{roleIndex + 1}</td>
+                    <td>{role.name}</td>
+                    <td>{role.description}</td>
+                    <td>
+                      <div className="d-flex justify-content-center align-items-center">
+                        <Link to={`/roles/update/${role.id}`} className="btn btn-primary mx-1">Sửa</Link>
+                        <button onClick={() => deleteRole(role.id)} className="btn btn-danger mx-1">Xoá</button>
                       </div>
-                    </tr>
-                  ))
-                }
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

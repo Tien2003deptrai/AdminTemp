@@ -13,46 +13,44 @@ import AddProject from 'src/views/projects/addProject/AddProject'
 import UpdateProject from 'src/views/projects/updateProject/UpdateProject'
 import UpdateJobs from 'src/views/jobs/updateJobs/UpdateJobs'
 import UpdateMember from 'src/views/member/updateMember/UpdateMember'
-import { AuthUser } from 'src/services/AuthUser'
-
-const checkRole = (allowedRoles, userRole) => {
-  return allowedRoles.includes(userRole);
-};
+import ScreenMember from 'src/views/member/screenMember/ScreenMember'
+import ScreenProject from 'src/views/projects/screenProjects/ScreenProjects'
 
 const AppContent = () => {
-
-  const { role } = AuthUser();
 
   return (
     <CContainer lg>
       <Suspense fallback={<CSpinner color="primary" />}>
         <Routes>
           {routes.map((route, idx) => {
-            if (!route.allowedRoles || checkRole(route.allowedRoles, role)) {
-              return (
-                route.element && (
-                  <Route
-                    key={idx}
-                    path={route.path}
-                    exact={route.exact}
-                    name={route.name}
-                    element={<route.element />}
-                  />
-                )
-              );
-            }
-            return null;
+            return (
+              route.element && (
+                <Route
+                  key={idx}
+                  path={route.path}
+                  exact={route.exact}
+                  name={route.name}
+                  element={<route.element />}
+                />
+              )
+            );
           })}
           {/* <Route path="/" element={<Navigate to="dashboard" replace />} /> */}
           <Route path="/members/add" element={<AddMember />} />
           <Route path="/members/update/:id" element={<UpdateMember />} />
+          <Route path="/members/screen/:id" element={<ScreenMember />} />
+
           <Route path="/jobs/add" element={<AddJobs />} />
           <Route path="/jobs/update/:id" element={<UpdateJobs />} />
+
           <Route path="/profile" element={<Profile />} />
+
           <Route path="/roles/add" element={<AddRole />} />
           <Route path="/roles/update/:id" element={<UpdateRole />} />
+
           <Route path="/projects/add" element={<AddProject />} />
           <Route path="/projects/update/:id" element={<UpdateProject />} />
+          <Route path="/projects/screen/:id" element={<ScreenProject />} />
 
         </Routes>
       </Suspense>
