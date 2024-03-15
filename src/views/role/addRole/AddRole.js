@@ -28,6 +28,7 @@ const AddRole = () => {
             navigate('/roles');
         } catch (error) {
             sendToastError('Failed to add role.');
+            navigate('/404');
             console.error(error);
         }
     };

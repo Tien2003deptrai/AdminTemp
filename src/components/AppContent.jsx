@@ -15,6 +15,7 @@ import UpdateJobs from 'src/views/jobs/updateJobs/UpdateJobs'
 import UpdateMember from 'src/views/member/updateMember/UpdateMember'
 import ScreenMember from 'src/views/member/screenMember/ScreenMember'
 import ScreenProject from 'src/views/projects/screenProjects/ScreenProjects'
+import Page403 from 'src/views/pages/page403/Page403'
 
 const AppContent = () => {
 
@@ -51,6 +52,8 @@ const AppContent = () => {
           <Route path="/projects/add" element={<AddProject />} />
           <Route path="/projects/update/:id" element={<UpdateProject />} />
           <Route path="/projects/screen/:id" element={<ScreenProject />} />
+
+          <Route path="/403" element={<Page403 />} />
 
         </Routes>
       </Suspense>

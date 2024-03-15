@@ -1,27 +1,106 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
 import { CCard, CCardBody } from '@coreui/react'
+import { AuthUser } from 'src/services/AuthUser';
 
 const Profile = () => {
+
+    const { http } = AuthUser();
+
+    const [taskStatistics, setTaskStatistics] = useState(0);
+
+    useEffect(() => {
+
+        const fetchApiTaskStatistics = async () => {
+            const response = await http.get('http://localhost:8080/api/v1/taskStatistics');
+            const apiTaskStatistics = response.data;
+            setTaskStatistics(apiTaskStatistics);
+            console.log('taskStatistics', taskStatistics);
+        }
+
+        fetchApiTaskStatistics();
+
+    }, [])
     return (
         <>
             <div className="container">
                 <h3>Chi tiết thành viên</h3>
-                <div className="card">
-                    <div className="card-header">
-                        Nguyễn Văn Tho
-                    </div>
-                    <div className="card-body">
-                        <div className="row">
-                            <div className="col-sm-6">
-                                <p><strong>Email:</strong> tho.nguyen@gmail.com</p>
-                                <p><strong>Số điện thoại:</strong> 0912345678</p>
-                                <p><strong>Quốc gia:</strong> Việt Nam</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <p><strong>Ngày tham gia:</strong> 30/05/2023</p>
-                                <p><strong>Chức vụ:</strong> Nhân viên</p>
-                                <p><strong>Đã hoàn thành:</strong> 20%</p>
+                <div id="content-wrapper" className="d-flex flex-column">
+                    <div id="content">
+                        <div className="container-fluid">
+                            <div className="row">
+                                <div className="col-xl-3 col-md-6 mb-4">
+                                    <div className="card border-left-warning shadow h-100 py-2">
+                                        <div className="card-body d-flex justify-content-center align-items-center">
+                                            <div className="row no-gutters align-items-center">
+                                                <div className="col mr-2">
+                                                    <div className="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                        Thông tin thành viên
+                                                    </div>
+                                                    <div className="member-info" style={{ height: '150px', overflow: 'hidden' }}>
+                                                        <img src='https://th.bing.com/th/id/OIP.pH1s8H18YJcCvQUuOzQUqQHaHa?rs=1&pid=ImgDetMain' alt="Member Info" className='img-fluid' />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-xl-3 col-md-6 mb-4">
+                                    <div className="card border-left-primary shadow h-100 py-2">
+                                        <div className="card-body d-flex justify-content-center align-items-center">
+                                            <div className="text-center">
+                                                <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                    Chưa bắt đầu
+                                                </div>
+                                                <div className="h5 mb-0 font-weight-bold text-gray-800">
+                                                    {taskStatistics.notStarted}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-xl-3 col-md-6 mb-4">
+                                    <div className="card border-left-success shadow h-100 py-2">
+                                        <div className="card-body d-flex justify-content-center align-items-center">
+                                            <div className="row no-gutters align-items-center">
+                                                <div className="col mr-2">
+                                                    <div className="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                        Đang thực hiện
+                                                    </div>
+                                                    {taskStatistics.inProgress}
+                                                </div>
+                                                <div className="col-auto">
+                                                    <i className="fas fa-dollar-sign fa-2x text-gray-300" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-xl-3 col-md-6 mb-4">
+                                    <div className="card border-left-info shadow h-100 py-2">
+                                        <div className="card-body d-flex justify-content-center align-items-center">
+                                            <div className="row no-gutters align-items-center">
+                                                <div className="col mr-2">
+                                                    <div className="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                        Hoàn thành
+                                                    </div>
+                                                    <div className="row no-gutters align-items-center">
+                                                        <div className="col-auto">
+                                                            <div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                                                {taskStatistics.completed}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-auto">
+                                                    <i className="fas fa-clipboard-list fa-2x text-gray-300" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>

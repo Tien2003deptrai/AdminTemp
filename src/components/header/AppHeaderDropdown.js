@@ -18,12 +18,14 @@ import CIcon from '@coreui/icons-react'
 
 import avatar8 from './../../assets/images/avatars/8.jpg'
 import { AuthUser } from 'src/services/AuthUser'
+import { useNavigate } from 'react-router-dom'
 
 const AppHeaderDropdown = () => {
 
   const { logout } = AuthUser();
-  const handleProfile = (tab) => {
-    navigate(tab)
+  const navigate = useNavigate();
+  const handleProfile = () => {
+    navigate('/profile')
   }
 
   return (
@@ -33,7 +35,7 @@ const AppHeaderDropdown = () => {
       </CDropdownToggle>
       <CDropdownMenu className="pt-0" placement="bottom-end">
         <CDropdownHeader className="bg-light fw-semibold py-2">Settings</CDropdownHeader>
-        <CDropdownItem onClick={() => handleProfile('/profile')}>
+        <CDropdownItem onClick={() => handleProfile()}>
           <CIcon icon={cilUser} className="me-2" />
           Thông tin cá nhân
         </CDropdownItem>

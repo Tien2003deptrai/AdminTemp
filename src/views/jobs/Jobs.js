@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { CCard, CCardBody } from '@coreui/react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthUser } from 'src/services/AuthUser';
-import { roleCheck } from 'src/config/common';
-import { handleAdd, handleDelete, handleUpdate, usePermissionState } from 'src/config/permissions';
+import { sendToast, sendToastError } from 'src/config/configToast';
+import SearchInput from 'src/components/SearchInput';
+import PageSizeDropdown from '../components/PageSizeDropdown';
+import Pagination from '../components/Pagination';
+import { filteredValue } from 'src/config/common';
+
 
 const Jobs = () => {
+  const { http } = AuthUser();
   const [jobs, setJobs] = useState([]);
-  const { http, token, role } = AuthUser();
-
-  const {
-    haveAdd, setHaveAdd,
-    haveUpdate, setHaveUpdate,
-    haveDelete, setHaveDelete,
-    haveView, setHaveView
-  } = usePermissionState();
+  const [fetchError, setFetchError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [jobsPerPage, setJobsPerPage] = useState(5);
+  const [inputKey, setInputKey] = useState('');
+  const navigate = useNavigate();
 
   const fetchApiJobs = async () => {
     try {
@@ -22,6 +24,9 @@ const Jobs = () => {
       return transformData(response.data.content);
     } catch (error) {
       console.error(error);
+      sendToastError('Failed to fetch role. Server error occurred.');
+      navigate('/403');
+      setFetchError(true);
       return [];
     }
   };
@@ -38,63 +43,51 @@ const Jobs = () => {
       .then(apiJobs => {
         setJobs(apiJobs);
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error(err)
+        setFetchError(true);
+      });
   }, []);
 
-  useEffect(() => {
-    if (token && role === roleCheck.staff) {
-      setHaveAdd(false);
-      setHaveUpdate(false);
-      setHaveDelete(false);
-      setHaveView(true);
-    } else {
-      setHaveAdd(true);
-      setHaveUpdate(true);
-      setHaveDelete(true);
-      setHaveView(true);
+  const handleAddJob = () => {
+    navigate('/jobs/add');
+  };
+
+  const deleteJob = async (id) => {
+    try {
+      await http.delete(`/v1/tasks/${id}`);
+      const updatedJob = jobs.filter(job => job.id !== id);
+      setJobs(updatedJob);
+      sendToast('Deleted job successfully.');
+    } catch (error) {
+      sendToastError('Failed to delete job.');
+      navigate('/404');
+      console.error(error);
     }
-  }, [token, role]);
+  };
 
-  const permissionAdd = () => {
-    handleAdd(haveAdd)
-  }
+  const totalJobs = jobs.length;
+  const totalPages = Math.ceil(totalJobs / jobsPerPage);
 
-  const permissionUpdate = () => {
-    handleUpdate(haveUpdate)
-  }
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
-  const permissionDelete = () => {
-    handleDelete(haveDelete)
-  }
-
-  const checkPermissionAccessAdd = () => {
-    return (
-      <>
-        {
-          token && role === roleCheck.staff ? (
-            <button type="button" className="btn btn-warning mb-3"
-              onClick={() => permissionAdd()}
-            >
-              Sửa
-            </button>
-          ) : (
-            <Link to={'/jobs/add'}>
-              <button type="button" className="btn btn-warning mb-3">Thêm</button>
-            </Link>
-          )
-        }
-      </>
-    )
-  }
+  const startIndex = (currentPage - 1) * jobsPerPage;
+  const endIndex = startIndex + jobsPerPage;
+  const filteredJobs = filteredValue(jobs, inputKey);
+  const displayedJobs = filteredJobs.slice(startIndex, endIndex);
 
   return (
     <>
       <div className="container">
         <h2>Danh sách công việc</h2>
-        {
-          checkPermissionAccessAdd()
-        }
+        <button type="button" className="btn btn-warning mb-3" onClick={handleAddJob}>
+          Thêm
+        </button>
       </div>
+      <SearchInput placeholder="Tìm kiếm..." value={inputKey} onChange={(e) => setInputKey(e.target.value)} />
+      <PageSizeDropdown options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]} onChange={setJobsPerPage} />
       <CCard className="mb-4">
         <CCardBody>
           <div className="table-responsive">
@@ -112,9 +105,9 @@ const Jobs = () => {
                 </tr>
               </thead>
               <tbody>
-                {jobs.map((job, jobIndex) => (
-                  <tr key={`job${jobIndex}`}>
-                    <td>{jobIndex + 1}</td>
+                {displayedJobs.map((job, jobIndex) => (
+                  <tr key={`job${startIndex + jobIndex}`}>
+                    <td>{startIndex + jobIndex + 1}</td>
                     <td>{job.name}</td>
                     <td>Dự án CRM</td>
                     <td>{job.username}</td>
@@ -123,25 +116,8 @@ const Jobs = () => {
                     <td>{job.status}</td>
                     <td>
                       <div className="d-flex justify-content-center align-items-center">
-                        {
-                          token && role === roleCheck.staff ? (
-                            <button type="button" className="btn btn-primary mx-1"
-                              onClick={() => permissionUpdate()}
-                            >
-                              Sửa
-                            </button>
-                          ) : (
-                            <Link to={`/jobs/update/${job.id}`} className="btn btn-primary mx-1"
-                            >
-                              Sửa
-                            </Link>
-                          )
-                        }
-                        <button className="btn btn-danger mx-1"
-                          onClick={() => permissionDelete()}
-                        >
-                          Xoá
-                        </button>
+                        <Link to={`/jobs/update/${job.id}`} className="btn btn-primary mx-1">Sửa</Link>
+                        <button className="btn btn-danger mx-1" onClick={() => deleteJob(job.id)}>Xoá</button>
                       </div>
                     </td>
                   </tr>
@@ -151,6 +127,11 @@ const Jobs = () => {
           </div>
         </CCardBody>
       </CCard>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </>
   );
 };

@@ -58,6 +58,7 @@ const UpdateMember = () => {
             } catch (error) {
                 console.error('Error updating member:', error.message);
                 sendToastError('Failed to update member.');
+                navigate('/404');
             }
         } else {
             sendToastError('Please input member.');

@@ -47,6 +47,7 @@ const UpdateJobs = () => {
         } catch (error) {
             console.error(error);
             sendToastError('Failed to update job.');
+            navigate('/404');
         }
     };
 

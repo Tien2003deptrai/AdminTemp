@@ -26,10 +26,11 @@ const AddProject = () => {
         e.preventDefault();
         try {
             await http.post('/v1/projects', formData);
-            navigate('/projects')
+            navigate('/projects');
             sendToast('Project added successfully.');
         } catch (error) {
             sendToastError('Failed to add project.');
+            navigate('/404');
             console.error(error);
         }
     };

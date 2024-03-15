@@ -34,7 +34,7 @@ export const AuthUser = () => {
         localStorage.setItem('role', JSON.stringify(role));
         // localStorage.setItem('role', JSON.stringify('ROLE_ADMIN'));
         // localStorage.setItem('role', JSON.stringify('ROLE_MANAGER'));
-        // localStorage.setItem('role', JSON.stringify('ROLE_USER'));
+        // localStorage.setItem('role', JSON.stringify('ROLE_STAFF'));
 
         setToken(token);
         setUser(user);

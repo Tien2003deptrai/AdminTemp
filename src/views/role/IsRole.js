@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { CCard, CCardBody } from '@coreui/react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthUser } from 'src/services/AuthUser';
 import { sendToast, sendToastError } from 'src/config/configToast';
-import { roleCheck } from 'src/config/common';
-import Page404 from '../pages/page404/Page404';
+import SearchInput from 'src/components/SearchInput';
+import PageSizeDropdown from '../components/PageSizeDropdown';
+import Pagination from '../components/Pagination';
+import { filteredValue } from 'src/config/common';
 
 const IsRole = () => {
+  const { http } = AuthUser();
   const [roles, setRoles] = useState([]);
-  const { role, http } = AuthUser();
+  const [fetchError, setFetchError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rolesPerPage, setRolesPerPage] = useState(5);
+  const [inputKey, setInputKey] = useState('');
+  const navigate = useNavigate();
 
   const fetchApiRoles = async () => {
     try {
@@ -16,6 +23,13 @@ const IsRole = () => {
       return response.data;
     } catch (error) {
       console.error(error);
+      if (error.response && error.response.status === 500 && error.response.data.message === "Access Denied") {
+        sendToastError('Failed to fetch role. Server error occurred.');
+        navigate('/403');
+        setFetchError(true);
+      } else {
+        sendToastError('Failed to fetch role.');
+      }
       return [];
     }
   }
@@ -25,9 +39,10 @@ const IsRole = () => {
       await http.delete(`/v1/roles/${id}`);
       const updatedRoles = roles.filter(role => role.id !== id);
       setRoles(updatedRoles);
-      sendToast('Role deleted successfully.');
+      sendToast('Deleted role successfully.');
     } catch (error) {
       sendToastError('Failed to delete role.');
+      navigate('/404');
       console.error(error);
     }
   };
@@ -37,12 +52,27 @@ const IsRole = () => {
       .then(apiRoles => {
         setRoles(apiRoles)
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err)
+        setFetchError(true);
+      })
   }, [])
 
-  if (role === roleCheck.staff || role === roleCheck.manager) {
-    return <Page404 />;
+  if (fetchError) {
+    return <Page403 />;
   }
+
+  const totalRoles = roles.length;
+  const totalPages = Math.ceil(totalRoles / rolesPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const startIndex = (currentPage - 1) * rolesPerPage;
+  const endIndex = startIndex + rolesPerPage;
+  const filteredRoles = filteredValue(roles, inputKey);
+  const displayedRoles = filteredRoles.slice(startIndex, endIndex);
 
   return (
     <>
@@ -52,6 +82,8 @@ const IsRole = () => {
           <button type="button" className="btn btn-warning mb-3">Thêm mới</button>
         </Link>
       </div>
+      <SearchInput placeholder="Tìm kiếm..." value={inputKey} onChange={(e) => setInputKey(e.target.value)} />
+      <PageSizeDropdown options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]} onChange={setRolesPerPage} />
       <CCard className="mb-4">
         <CCardBody>
           <div className="table-responsive">
@@ -65,9 +97,9 @@ const IsRole = () => {
                 </tr>
               </thead>
               <tbody>
-                {roles.map((role, roleIndex) => (
-                  <tr key={roleIndex}>
-                    <td>{roleIndex + 1}</td>
+                {displayedRoles.map((role, index) => (
+                  <tr key={index}>
+                    <td>{startIndex + index + 1}</td>
                     <td>{role.name}</td>
                     <td>{role.description}</td>
                     <td>
@@ -83,6 +115,11 @@ const IsRole = () => {
           </div>
         </CCardBody>
       </CCard>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </>
   );
 }

@@ -4,6 +4,7 @@ import { AuthUser } from 'src/services/AuthUser';
 import { sendToast, sendToastError } from 'src/config/configToast';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { roleCheck } from 'src/config/common';
 
 const AddJob = () => {
     const { http } = AuthUser();
@@ -15,8 +16,9 @@ const AddJob = () => {
         endDate: '',
         status: '',
     });
-    const [users, setUsers] = useState([]);
 
+    const [users, setUsers] = useState([]);
+    const [jobs, setJobs] = useState([]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -32,6 +34,12 @@ const AddJob = () => {
             .catch(err => console.error(err))
     }
 
+    const fetchApiJobs = async () => {
+        return await http.get('/v1/tasks')
+            .then(res => { return res.data.content })
+            .catch(err => console.error(err))
+    }
+
     useEffect(() => {
         fetchApiMembers()
             .then(apiUser => {
@@ -39,20 +47,26 @@ const AddJob = () => {
                 console.log(users);
             })
             .catch(err => console.error(err))
+        fetchApiJobs()
+            .then(apiJobs => {
+                setJobs(apiJobs);
+                console.log(jobs);
+            })
+            .catch(err => console.error(err))
     }, [])
 
     // lấy userId để đưa vào api /v1/projects/:projectId/users/:userId/tasks
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await http.post(`/v1/projects/:projectId/users/:userId/tasks`, job);
+            await http.post(`/v1/projects/${jobs.id}/users/${users.id}/tasks`, job);
             navigate('/jobs')
             sendToast('Job added successfully.');
         } catch (error) {
             console.error(error);
             sendToastError('Failed to add job.');
+            navigate('/404');
         }
     };
 

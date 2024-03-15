@@ -35,6 +35,7 @@ const UpdateRole = () => {
             sendToast('Role updated successfully.');
         } catch (error) {
             sendToastError('Failed to update role.');
+            navigate('/404');
             console.error(error);
         }
     };

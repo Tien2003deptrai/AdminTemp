@@ -16,7 +16,9 @@ import { Link } from 'react-router-dom'
 const Page404 = () => {
   const navigate = useNavigate()
   const handleClick = () => {
-    navigate('/')
+    // navigate('/')
+    // navigate.goBack();
+    window.history.back();
   }
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center">

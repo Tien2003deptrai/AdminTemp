@@ -1,5 +1,4 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   CContainer,
@@ -10,13 +9,17 @@ import {
   CHeaderToggler,
   CNavLink,
   CNavItem,
+  CFormInput,
+  CButton,
+  CCard,
+  CCardBody,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilBell, cilEnvelopeOpen, cilList, cilMenu } from '@coreui/icons'
-
 import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
 import { logo } from 'src/assets/brand/logo'
+import { AuthUser } from 'src/services/AuthUser'
 
 const AppHeader = () => {
   const dispatch = useDispatch()
@@ -34,14 +37,15 @@ const AppHeader = () => {
         <CHeaderBrand className="mx-auto d-md-none" to="/">
           <CIcon icon={logo} height={48} alt="Logo" />
         </CHeaderBrand>
-        <CHeaderNav className="d-none d-md-flex me-auto">
-          <CNavItem>
-            <CNavLink to="/dashboard" component={NavLink}>
-              Dashboard
-            </CNavLink>
-          </CNavItem>
+        <CHeaderNav className="d-flex align-items-center">
+          <CFormInput
+            type="text"
+            placeholder="Tìm kiếm..."
+            className="me-2"
+            style={{ width: '300px' }}
+          />
         </CHeaderNav>
-        <CHeaderNav>
+        <CHeaderNav className="ms-auto">
           <CNavItem>
             <CNavLink href="#">
               <CIcon icon={cilBell} size="lg" />

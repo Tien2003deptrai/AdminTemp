@@ -36,6 +36,7 @@ const UpdateProject = () => {
         } catch (error) {
             console.error(error);
             sendToastError('Failed to update project.');
+            navigate('/404');
         }
     };
 
